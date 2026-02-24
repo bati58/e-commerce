@@ -170,7 +170,7 @@ const CartPage = () => {
               return (
                 <article key={item._id} className="cart-row">
                   <div className="cart-product-cell">
-                    <img src={item.image} alt={item.name} />
+                    <img src={item.image} alt={item.name} loading="lazy" decoding="async" />
                     <div>
                       <h3>{item.name}</h3>
                       {variantLabel ? <p>{variantLabel}</p> : null}

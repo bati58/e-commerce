@@ -1,4 +1,5 @@
-import { Routes, Route } from "react-router-dom";
+import { useMemo } from "react";
+import { Link, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
 import HomePage from "./pages/HomePage.jsx";
@@ -14,10 +15,31 @@ import PrivateRoute from "./components/PrivateRoute.jsx";
 import { useCart } from "./state/CartContext.jsx";
 
 const App = () => {
-  const { cartToast } = useCart();
+  const { cartItems, cartToast } = useCart();
+  const location = useLocation();
+
+  const cartCount = useMemo(
+    () => cartItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0),
+    [cartItems]
+  );
+
+  const cartSubtotal = useMemo(
+    () =>
+      cartItems.reduce(
+        (sum, item) =>
+          sum +
+          Number(item.discountedPrice ?? item.price ?? 0) *
+            Number(item.quantity || 0),
+        0
+      ),
+    [cartItems]
+  );
+
+  const hideMobileCartBar = ["/cart", "/checkout"].includes(location.pathname);
+  const showMobileCartBar = cartCount > 0 && !hideMobileCartBar;
 
   return (
-    <div className="app">
+    <div className={`app${showMobileCartBar ? " has-mobile-cart-bar" : ""}`}>
       <Navbar />
       <main className="main">
         <Routes>
@@ -50,6 +72,15 @@ const App = () => {
         <div className="cart-toast" role="status" aria-live="polite">
           {cartToast.message}
         </div>
+      ) : null}
+      {showMobileCartBar ? (
+        <Link to="/cart" className="mobile-cart-bar" aria-label="Open cart">
+          <div className="mobile-cart-bar-copy">
+            <strong>{cartCount} items in cart</strong>
+            <span>${cartSubtotal.toFixed(2)}</span>
+          </div>
+          <span className="mobile-cart-bar-action">View Cart</span>
+        </Link>
       ) : null}
       <Footer />
     </div>

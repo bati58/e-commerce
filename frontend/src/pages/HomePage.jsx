@@ -150,8 +150,15 @@ const HomePage = () => {
           </div>
 
           <div className="hero-media">
-            {featuredProducts.slice(0, 3).map((product) => (
-              <img key={product._id} src={product.image} alt={product.name} />
+            {featuredProducts.slice(0, 3).map((product, index) => (
+              <img
+                key={product._id}
+                src={product.image}
+                alt={product.name}
+                loading={index === 0 ? "eager" : "lazy"}
+                fetchPriority={index === 0 ? "high" : "auto"}
+                decoding="async"
+              />
             ))}
             {featuredProducts.length === 0 ? (
               <div className="hero-fallback">Product showcase appears here</div>

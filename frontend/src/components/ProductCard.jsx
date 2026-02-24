@@ -53,7 +53,13 @@ const ProductCard = ({
     <article className={`card product-card${isCatalog ? " catalog-card" : ""}`}>
       <div className="card-media">
         <Link to={`/products/${product._id}`}>
-          <img src={product.image} alt={product.name} className="card-image" />
+          <img
+            src={product.image}
+            alt={product.name}
+            className="card-image"
+            loading={isCatalog ? "lazy" : "eager"}
+            decoding="async"
+          />
         </Link>
 
         {showWishlist ? (

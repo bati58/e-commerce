@@ -161,6 +161,8 @@ const ProductsPage = () => {
   const [priceRange, setPriceRange] = useState({ min: 0, max: 0 });
   const [currentPage, setCurrentPage] = useState(1);
   const [wishlistIds, setWishlistIds] = useState(getInitialWishlistIds);
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  const isWishlistMode = searchParams.get("wishlist") === "1";
 
   const fetchProducts = (searchValue) => {
     const params = searchValue ? { params: { search: searchValue } } : undefined;
@@ -230,6 +232,8 @@ const ProductsPage = () => {
     return decoratedProducts.filter((product) => {
       const finalPrice = Number(product.discountedPrice || 0);
 
+      if (isWishlistMode && !wishlistIds.includes(product._id)) return false;
+
       if (priceLimits.max > 0) {
         if (finalPrice < priceRange.min || finalPrice > priceRange.max) return false;
       }
@@ -270,6 +274,8 @@ const ProductsPage = () => {
     selectedColors,
     selectedRatings,
     selectedSizes,
+    isWishlistMode,
+    wishlistIds,
   ]);
 
   const sortedProducts = useMemo(() => {
@@ -333,7 +339,8 @@ const ProductsPage = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
     const trimmed = searchInput.trim();
-    setSearchParams(trimmed ? { search: trimmed } : {});
+    setSearchParams(trimmed ? { search: trimmed } : isWishlistMode ? { wishlist: "1" } : {});
+    setIsMobileFiltersOpen(false);
   };
 
   const resetFilters = () => {
@@ -349,7 +356,41 @@ const ProductsPage = () => {
     setPriceRange({ min: priceLimits.min, max: priceLimits.max });
   };
 
-  const breadcrumbScope = activeSearch ? toTitleCase(activeSearch) : "All Categories";
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (selectedBrands.length > 0) count += 1;
+    if (selectedRatings.length > 0) count += 1;
+    if (selectedSizes.length > 0) count += 1;
+    if (selectedColors.length > 0) count += 1;
+    if (availability !== "all") count += 1;
+    if (discountOnly) count += 1;
+    if (minDiscount > 0) count += 1;
+    if (priceRange.min !== priceLimits.min || priceRange.max !== priceLimits.max) count += 1;
+    return count;
+  }, [
+    availability,
+    discountOnly,
+    minDiscount,
+    priceLimits.max,
+    priceLimits.min,
+    priceRange.max,
+    priceRange.min,
+    selectedBrands.length,
+    selectedColors.length,
+    selectedRatings.length,
+    selectedSizes.length,
+  ]);
+
+  const breadcrumbScope = isWishlistMode
+    ? "Wishlist"
+    : activeSearch
+      ? toTitleCase(activeSearch)
+      : "All Categories";
+  const pageTitle = isWishlistMode
+    ? "My Wishlist"
+    : activeSearch
+      ? `${breadcrumbScope} Collection`
+      : "All Products";
 
   return (
     <section className="container">
@@ -361,11 +402,14 @@ const ProductsPage = () => {
           <span> &gt; </span>
           <span>Products</span>
         </p>
-        <h1>{activeSearch ? `${breadcrumbScope} Collection` : "All Products"}</h1>
+        <h1>{pageTitle}</h1>
       </header>
 
       <div className="catalog-shell">
-        <aside className="catalog-sidebar">
+        <aside
+          id="catalog-filters"
+          className={`catalog-sidebar${isMobileFiltersOpen ? " open" : " closed"}`}
+        >
           <div className="filter-header">
             <h2>Filters</h2>
             <button type="button" className="btn-link" onClick={resetFilters}>
@@ -544,6 +588,15 @@ const ProductsPage = () => {
           <div className="catalog-toolbar">
             <p className="result-count">{sortedProducts.length} products found</p>
             <div className="toolbar-controls">
+              <button
+                type="button"
+                className={`mobile-filter-toggle${isMobileFiltersOpen ? " active" : ""}`}
+                aria-expanded={isMobileFiltersOpen}
+                aria-controls="catalog-filters"
+                onClick={() => setIsMobileFiltersOpen((previous) => !previous)}
+              >
+                {isMobileFiltersOpen ? "Hide Filters" : `Filters${activeFilterCount ? ` (${activeFilterCount})` : ""}`}
+              </button>
               <label className="sort-label">
                 Sort
                 <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
@@ -574,8 +627,14 @@ const ProductsPage = () => {
 
           {pagedProducts.length === 0 ? (
             <div className="catalog-empty">
-              <h3>No products match these filters.</h3>
-              <p>Try broadening your filters or clearing search.</p>
+              <h3>
+                {isWishlistMode ? "No items in your wishlist yet." : "No products match these filters."}
+              </h3>
+              <p>
+                {isWishlistMode
+                  ? "Tap heart icons on product cards to save favorites."
+                  : "Try broadening your filters or clearing search."}
+              </p>
             </div>
           ) : (
             <div className={`catalog-grid ${gridView}`}>
