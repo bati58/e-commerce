@@ -49,9 +49,10 @@ export const CartProvider = ({ children }) => {
   };
 
   const updateQuantity = (productId, quantity) => {
+    const safeQuantity = Math.max(1, Number(quantity) || 1);
     setCartItems((prev) =>
       prev.map((item) =>
-        item._id === productId ? { ...item, quantity } : item
+        item._id === productId ? { ...item, quantity: safeQuantity } : item
       )
     );
   };
