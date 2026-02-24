@@ -4,13 +4,12 @@ import CheckoutForm from "../components/CheckoutForm.jsx";
 import { useAuth } from "../state/AuthContext.jsx";
 import { useCart } from "../state/CartContext.jsx";
 import apiClient from "../utils/apiClient.js";
+import { formatUsdAndEtb } from "../utils/currency.js";
 
 const SHIPPING_FEE = 10;
 const TAX_RATE = 0.05;
 const SHIPPING_STORAGE_KEY = "mern_checkout_shipping";
 const GUEST_ORDERS_KEY = "mern_guest_orders";
-
-const formatPrice = (value) => `$${Number(value || 0).toFixed(2)}`;
 
 const getUnitPrice = (item) => Number(item.discountedPrice ?? item.price ?? 0);
 
@@ -284,7 +283,7 @@ const CheckoutPage = () => {
                 <p>
                   {item.name} x {item.quantity}
                 </p>
-                <strong>{formatPrice(getUnitPrice(item) * item.quantity)}</strong>
+                <strong>{formatUsdAndEtb(getUnitPrice(item) * item.quantity)}</strong>
               </div>
             ))}
           </div>
@@ -292,19 +291,19 @@ const CheckoutPage = () => {
           <div className="checkout-summary-lines">
             <p>
               <span>Items</span>
-              <strong>{formatPrice(serverSubtotal)}</strong>
+              <strong>{formatUsdAndEtb(serverSubtotal)}</strong>
             </p>
             <p>
               <span>Shipping</span>
-              <strong>{formatPrice(shipping)}</strong>
+              <strong>{formatUsdAndEtb(shipping)}</strong>
             </p>
             <p>
               <span>Tax</span>
-              <strong>{formatPrice(tax)}</strong>
+              <strong>{formatUsdAndEtb(tax)}</strong>
             </p>
             <p className="checkout-total-line">
               <span>Total</span>
-              <strong>{formatPrice(orderTotal)}</strong>
+              <strong>{formatUsdAndEtb(orderTotal)}</strong>
             </p>
           </div>
 

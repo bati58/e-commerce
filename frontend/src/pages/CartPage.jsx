@@ -1,17 +1,16 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../state/CartContext.jsx";
+import { formatUsdAndEtb } from "../utils/currency.js";
 
 const SHIPPING_FEE = 10;
 const TAX_RATE = 0.05;
 
 const PROMO_CODES = {
   SAVE10: { type: "percent", value: 10, label: "10% off subtotal" },
-  SAVE20: { type: "fixed", value: 20, label: "$20 off subtotal" },
+  SAVE20: { type: "fixed", value: 20, label: `${formatUsdAndEtb(20)} off subtotal` },
   FREESHIP: { type: "shipping", value: SHIPPING_FEE, label: "Free shipping" },
 };
-
-const formatPrice = (amount) => `$${Number(amount || 0).toFixed(2)}`;
 
 const getUnitPrice = (item) => Number(item.discountedPrice ?? item.price ?? 0);
 
@@ -177,7 +176,7 @@ const CartPage = () => {
                     </div>
                   </div>
 
-                  <p className="cart-price-cell">{formatPrice(unitPrice)}</p>
+                  <p className="cart-price-cell">{formatUsdAndEtb(unitPrice)}</p>
 
                   <div className="cart-qty-cell">
                     <button
@@ -203,7 +202,7 @@ const CartPage = () => {
                     </button>
                   </div>
 
-                  <p className="cart-total-cell">{formatPrice(lineTotal)}</p>
+                  <p className="cart-total-cell">{formatUsdAndEtb(lineTotal)}</p>
 
                   <button
                     type="button"
@@ -225,23 +224,23 @@ const CartPage = () => {
           <div className="summary-lines">
             <p>
               <span>Subtotal</span>
-              <strong>{formatPrice(subtotal)}</strong>
+              <strong>{formatUsdAndEtb(subtotal)}</strong>
             </p>
             <p>
               <span>Shipping</span>
-              <strong>{formatPrice(shipping)}</strong>
+              <strong>{formatUsdAndEtb(shipping)}</strong>
             </p>
             <p>
               <span>Tax</span>
-              <strong>{formatPrice(tax)}</strong>
+              <strong>{formatUsdAndEtb(tax)}</strong>
             </p>
             <p className="summary-total">
               <span>Total</span>
-              <strong>{formatPrice(total)}</strong>
+              <strong>{formatUsdAndEtb(total)}</strong>
             </p>
           </div>
 
-          <p className="summary-saving">You save {formatPrice(totalSavings)} on this order</p>
+          <p className="summary-saving">You save {formatUsdAndEtb(totalSavings)} on this order</p>
 
           <form className="promo-form" onSubmit={handlePromoSubmit}>
             <label htmlFor="promo-input">Promo Code</label>

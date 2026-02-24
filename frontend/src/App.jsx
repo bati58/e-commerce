@@ -13,6 +13,7 @@ import OrdersPage from "./pages/OrdersPage.jsx";
 import AccountPage from "./pages/AccountPage.jsx";
 import PrivateRoute from "./components/PrivateRoute.jsx";
 import { useCart } from "./state/CartContext.jsx";
+import { formatUsdAndEtb } from "./utils/currency.js";
 
 const App = () => {
   const { cartItems, cartToast } = useCart();
@@ -77,7 +78,7 @@ const App = () => {
         <Link to="/cart" className="mobile-cart-bar" aria-label="Open cart">
           <div className="mobile-cart-bar-copy">
             <strong>{cartCount} items in cart</strong>
-            <span>${cartSubtotal.toFixed(2)}</span>
+            <span>{formatUsdAndEtb(cartSubtotal)}</span>
           </div>
           <span className="mobile-cart-bar-action">View Cart</span>
         </Link>

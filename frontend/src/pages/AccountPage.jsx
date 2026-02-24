@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../state/AuthContext.jsx";
 import apiClient from "../utils/apiClient.js";
+import { formatUsdAndEtb } from "../utils/currency.js";
 
 const WISHLIST_STORAGE_KEY = "mern_wishlist_ids";
 const SHIPPING_STORAGE_KEY = "mern_checkout_shipping";
@@ -42,8 +43,6 @@ const readJson = (key, fallback) => {
     return fallback;
   }
 };
-
-const formatPrice = (value) => `$${Number(value || 0).toFixed(2)}`;
 
 const shortId = (value = "") => String(value).slice(0, 8).toUpperCase();
 
@@ -199,7 +198,7 @@ const AccountPage = () => {
               <span className={`account-status ${statusClassName(order.status)}`}>
                 {formatStatus(order.status)}
               </span>
-              <strong>{formatPrice(order.total)}</strong>
+              <strong>{formatUsdAndEtb(order.total)}</strong>
             </div>
           </li>
         ))}
@@ -220,7 +219,7 @@ const AccountPage = () => {
         </article>
         <article className="account-stat-card">
           <p>Total Spent</p>
-          <strong>{formatPrice(stats.totalSpent)}</strong>
+          <strong>{formatUsdAndEtb(stats.totalSpent)}</strong>
         </article>
       </div>
 
@@ -335,11 +334,11 @@ const AccountPage = () => {
                       <span>
                         {item.name} x {item.quantity}
                       </span>
-                      <strong>{formatPrice(Number(item.price || 0) * Number(item.quantity || 0))}</strong>
+                      <strong>{formatUsdAndEtb(Number(item.price || 0) * Number(item.quantity || 0))}</strong>
                     </li>
                   ))}
                 </ul>
-                <p className="account-order-total">Total: {formatPrice(order.total)}</p>
+                <p className="account-order-total">Total: {formatUsdAndEtb(order.total)}</p>
               </article>
             ))}
           </div>
@@ -377,7 +376,7 @@ const AccountPage = () => {
               {formatStatus(trackedOrder.status)}
             </span>
           </div>
-          <p className="account-order-total">Total: {formatPrice(trackedOrder.total)}</p>
+          <p className="account-order-total">Total: {formatUsdAndEtb(trackedOrder.total)}</p>
         </article>
       ) : null}
     </div>
@@ -480,7 +479,7 @@ const AccountPage = () => {
                   <strong>Order #{shortId(order._id)}</strong>
                   <p>Delivered on {formatDateTime(order.createdAt)}</p>
                 </div>
-                <strong>{formatPrice(order.total)}</strong>
+                <strong>{formatUsdAndEtb(order.total)}</strong>
               </li>
             ))}
           </ul>

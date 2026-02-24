@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { useCart } from "../state/CartContext.jsx";
-
-const formatPrice = (value) => `$${Number(value || 0).toFixed(2)}`;
+import { formatUsdAndEtb } from "../utils/currency.js";
 
 const clampRating = (value) => {
   if (Number.isNaN(value)) return 4;
@@ -92,16 +91,16 @@ const ProductCard = ({
 
         {isCatalog ? (
           <div className="price-stack">
-            <p className="price-current">{formatPrice(finalPrice)}</p>
+            <p className="price-current">{formatUsdAndEtb(finalPrice)}</p>
             {hasDiscount ? (
               <>
-                <p className="price-original">{formatPrice(originalPrice)}</p>
+                <p className="price-original">{formatUsdAndEtb(originalPrice)}</p>
                 <p className="discount-chip">-{discountPercent}%</p>
               </>
             ) : null}
           </div>
         ) : (
-          <p className="price">{formatPrice(originalPrice)}</p>
+          <p className="price">{formatUsdAndEtb(originalPrice)}</p>
         )}
 
         <button

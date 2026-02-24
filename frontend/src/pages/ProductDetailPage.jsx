@@ -4,6 +4,7 @@ import apiClient from "../utils/apiClient.js";
 import { useCart } from "../state/CartContext.jsx";
 import { useAuth } from "../state/AuthContext.jsx";
 import ProductCard from "../components/ProductCard.jsx";
+import { formatUsdAndEtb } from "../utils/currency.js";
 
 const CATEGORY_KEYWORDS = {
   Electronics: [
@@ -58,8 +59,6 @@ const inferBrand = (name = "") => {
   if (!first || first.length < 2) return "Generic";
   return `${first.charAt(0).toUpperCase()}${first.slice(1)}`;
 };
-
-const formatPrice = (value) => `$${Number(value || 0).toFixed(2)}`;
 
 const getStars = (rating) => {
   const rounded = Math.max(1, Math.min(5, Math.round(Number(rating) || 4)));
@@ -314,10 +313,10 @@ const ProductDetailPage = () => {
           </p>
 
           <div className="detail-price-row">
-            <p className="detail-price">{formatPrice(detailedProduct.discountedPrice)}</p>
+            <p className="detail-price">{formatUsdAndEtb(detailedProduct.discountedPrice)}</p>
             {detailedProduct.discountPercent > 0 ? (
               <>
-                <p className="detail-price-old">{formatPrice(detailedProduct.originalPrice)}</p>
+                <p className="detail-price-old">{formatUsdAndEtb(detailedProduct.originalPrice)}</p>
                 <p className="detail-discount">-{detailedProduct.discountPercent}%</p>
               </>
             ) : null}
@@ -532,7 +531,7 @@ const ProductDetailPage = () => {
             </div>
             <div className="fbt-footer">
               <p>
-                Bundle Price: <strong>{formatPrice(bundleTotal)}</strong>
+                Bundle Price: <strong>{formatUsdAndEtb(bundleTotal)}</strong>
               </p>
               <button type="button" className="btn-primary" onClick={handleAddBundle}>
                 Add Bundle to Cart

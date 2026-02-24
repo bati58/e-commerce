@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import apiClient from "../utils/apiClient.js";
+import { formatUsdAndEtb } from "../utils/currency.js";
 
 const OrdersPage = () => {
   const [orders, setOrders] = useState([]);
@@ -27,11 +28,11 @@ const OrdersPage = () => {
               <ul>
                 {order.products.map((item, idx) => (
                   <li key={idx}>
-                    {item.name} x {item.quantity} (${item.price.toFixed(2)})
+                    {item.name} x {item.quantity} ({formatUsdAndEtb(item.price)})
                   </li>
                 ))}
               </ul>
-              <p>Total: ${order.total.toFixed(2)}</p>
+              <p>Total: {formatUsdAndEtb(order.total)}</p>
               <p>
                 Placed on:{" "}
                 {new Date(order.createdAt).toLocaleString(undefined, {
@@ -48,4 +49,3 @@ const OrdersPage = () => {
 };
 
 export default OrdersPage;
-
