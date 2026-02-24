@@ -10,8 +10,11 @@ import LoginPage from "./pages/LoginPage.jsx";
 import SignupPage from "./pages/SignupPage.jsx";
 import OrdersPage from "./pages/OrdersPage.jsx";
 import PrivateRoute from "./components/PrivateRoute.jsx";
+import { useCart } from "./state/CartContext.jsx";
 
 const App = () => {
+  const { cartToast } = useCart();
+
   return (
     <div className="app">
       <Navbar />
@@ -41,10 +44,14 @@ const App = () => {
           <Route path="/signup" element={<SignupPage />} />
         </Routes>
       </main>
+      {cartToast ? (
+        <div className="cart-toast" role="status" aria-live="polite">
+          {cartToast.message}
+        </div>
+      ) : null}
       <Footer />
     </div>
   );
 };
 
 export default App;
-

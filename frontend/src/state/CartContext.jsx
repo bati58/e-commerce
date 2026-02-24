@@ -6,6 +6,7 @@ const STORAGE_KEY = "mern_cart";
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
+  const [cartToast, setCartToast] = useState(null);
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -18,6 +19,16 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cartItems));
   }, [cartItems]);
 
+  useEffect(() => {
+    if (!cartToast) return;
+
+    const timer = setTimeout(() => {
+      setCartToast(null);
+    }, 2200);
+
+    return () => clearTimeout(timer);
+  }, [cartToast]);
+
   const addToCart = (product, quantity = 1) => {
     setCartItems((prev) => {
       const existing = prev.find((item) => item._id === product._id);
@@ -29,6 +40,11 @@ export const CartProvider = ({ children }) => {
         );
       }
       return [...prev, { ...product, quantity }];
+    });
+
+    setCartToast({
+      id: Date.now(),
+      message: `${product.name} added to cart`,
     });
   };
 
@@ -48,7 +64,14 @@ export const CartProvider = ({ children }) => {
 
   return (
     <CartContext.Provider
-      value={{ cartItems, addToCart, updateQuantity, removeFromCart, clearCart }}
+      value={{
+        cartItems,
+        addToCart,
+        updateQuantity,
+        removeFromCart,
+        clearCart,
+        cartToast,
+      }}
     >
       {children}
     </CartContext.Provider>
@@ -56,4 +79,3 @@ export const CartProvider = ({ children }) => {
 };
 
 export const useCart = () => useContext(CartContext);
-
