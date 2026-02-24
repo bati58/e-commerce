@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import apiClient from "../utils/apiClient.js";
 import ProductCard from "../components/ProductCard.jsx";
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
-  const [search, setSearch] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeSearch = searchParams.get("search") || "";
+  const [search, setSearch] = useState(activeSearch);
 
-  const fetchProducts = () => {
-    const params = search ? { params: { search } } : undefined;
+  const fetchProducts = (searchValue) => {
+    const params = searchValue ? { params: { search: searchValue } } : undefined;
     apiClient
       .get("/products", params)
       .then((res) => setProducts(res.data))
@@ -15,13 +18,17 @@ const ProductsPage = () => {
   };
 
   useEffect(() => {
-    fetchProducts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    setSearch(activeSearch);
+  }, [activeSearch]);
+
+  useEffect(() => {
+    fetchProducts(activeSearch);
+  }, [activeSearch]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    fetchProducts();
+    const trimmed = search.trim();
+    setSearchParams(trimmed ? { search: trimmed } : {});
   };
 
   return (
@@ -50,4 +57,3 @@ const ProductsPage = () => {
 };
 
 export default ProductsPage;
-
