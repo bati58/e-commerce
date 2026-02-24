@@ -88,6 +88,9 @@ const Navbar = () => {
 
         {user ? (
           <>
+            <NavLink to="/account" className={textLinkClassName}>
+              Account
+            </NavLink>
             <NavLink to="/orders" className={textLinkClassName}>
               My Orders
             </NavLink>

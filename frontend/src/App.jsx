@@ -9,6 +9,7 @@ import CheckoutPage from "./pages/CheckoutPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import SignupPage from "./pages/SignupPage.jsx";
 import OrdersPage from "./pages/OrdersPage.jsx";
+import AccountPage from "./pages/AccountPage.jsx";
 import PrivateRoute from "./components/PrivateRoute.jsx";
 import { useCart } from "./state/CartContext.jsx";
 
@@ -25,6 +26,14 @@ const App = () => {
           <Route path="/products/:id" element={<ProductDetailPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
+          <Route
+            path="/account"
+            element={
+              <PrivateRoute>
+                <AccountPage />
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/orders"
             element={
