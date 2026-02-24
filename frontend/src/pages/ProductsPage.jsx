@@ -2,12 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import apiClient from "../utils/apiClient.js";
 import ProductCard from "../components/ProductCard.jsx";
-import { applyGlobalProductDiscount, getDiscountPercent } from "../utils/pricing.js";
+import { getOriginalPrice } from "../utils/pricing.js";
 
 const PAGE_SIZE = 8;
 const WISHLIST_STORAGE_KEY = "mern_wishlist_ids";
 const RATING_OPTIONS = [4, 3, 2];
-const DISCOUNT_STEPS = [0, 10, 20, 30, 40, 50];
 const COLOR_POOL = ["Black", "White", "Blue", "Green", "Brown", "Gray", "Beige", "Red"];
 const CATEGORY_KEYWORDS = {
   Electronics: [
@@ -84,22 +83,7 @@ const buildPresentationProduct = (product) => {
     (product.rating ?? Math.min(5, 3.6 + ((seed % 15) + 2) / 10)).toFixed(1)
   );
   const ratingCount = Number(product.ratingCount ?? 35 + (seed % 260));
-  const discountPercent = Number(
-    product.discountPercent ??
-      (seed % 5 === 0 ? 0 : [10, 15, 20, 25, 30, 35][seed % 6])
-  );
-
-  const originalPrice = Number(product.price ?? 0);
-  const baseCurrentPrice = Number(
-    (
-      product.discountedPrice ??
-      (discountPercent > 0
-        ? originalPrice - (originalPrice * discountPercent) / 100
-        : originalPrice)
-    ).toFixed(2)
-  );
-  const currentPrice = applyGlobalProductDiscount(baseCurrentPrice);
-  const effectiveDiscountPercent = getDiscountPercent(originalPrice, currentPrice);
+  const currentPrice = getOriginalPrice(product);
 
   const isFashion = category === "Fashion";
   const sizePool = isFashion ? ["XS", "S", "M", "L", "XL"] : ["One Size", "Standard"];
@@ -120,10 +104,8 @@ const buildPresentationProduct = (product) => {
     brand,
     rating,
     ratingCount,
-    discountPercent: effectiveDiscountPercent,
-    originalPrice,
-    discountedPrice: baseCurrentPrice,
-    baseCurrentPrice,
+    discountPercent: 0,
+    originalPrice: Number(product.price ?? 0),
     currentPrice,
     shortDescription: safeDescription,
     sizes,
@@ -160,8 +142,6 @@ const ProductsPage = () => {
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [selectedColors, setSelectedColors] = useState([]);
   const [availability, setAvailability] = useState("all");
-  const [discountOnly, setDiscountOnly] = useState(false);
-  const [minDiscount, setMinDiscount] = useState(0);
   const [priceLimits, setPriceLimits] = useState({ min: 0, max: 0 });
   const [priceRange, setPriceRange] = useState({ min: 0, max: 0 });
   const [currentPage, setCurrentPage] = useState(1);
@@ -262,16 +242,12 @@ const ProductsPage = () => {
 
       if (availability === "in" && !product.inStock) return false;
       if (availability === "out" && product.inStock) return false;
-      if (discountOnly && product.discountPercent <= 0) return false;
-      if (minDiscount > 0 && product.discountPercent < minDiscount) return false;
 
       return true;
     });
   }, [
     availability,
     decoratedProducts,
-    discountOnly,
-    minDiscount,
     priceLimits.max,
     priceRange.max,
     priceRange.min,
@@ -307,8 +283,6 @@ const ProductsPage = () => {
   }, [
     activeSearch,
     availability,
-    discountOnly,
-    minDiscount,
     selectedBrands,
     selectedColors,
     selectedRatings,
@@ -354,8 +328,6 @@ const ProductsPage = () => {
     setSelectedSizes([]);
     setSelectedColors([]);
     setAvailability("all");
-    setDiscountOnly(false);
-    setMinDiscount(0);
     setSortBy("popularity");
     setGridView("grid");
     setPriceRange({ min: priceLimits.min, max: priceLimits.max });
@@ -368,14 +340,10 @@ const ProductsPage = () => {
     if (selectedSizes.length > 0) count += 1;
     if (selectedColors.length > 0) count += 1;
     if (availability !== "all") count += 1;
-    if (discountOnly) count += 1;
-    if (minDiscount > 0) count += 1;
     if (priceRange.min !== priceLimits.min || priceRange.max !== priceLimits.max) count += 1;
     return count;
   }, [
     availability,
-    discountOnly,
-    minDiscount,
     priceLimits.max,
     priceLimits.min,
     priceRange.max,
@@ -561,31 +529,6 @@ const ProductsPage = () => {
                 <span>Out of Stock</span>
               </label>
             </div>
-          </section>
-
-          <section className="filter-group">
-            <h3>Discount</h3>
-            <label className="filter-option">
-              <input
-                type="checkbox"
-                checked={discountOnly}
-                onChange={(event) => setDiscountOnly(event.target.checked)}
-              />
-              <span>On Sale Only</span>
-            </label>
-            <label htmlFor="min-discount" className="discount-label">
-              Minimum Discount: {minDiscount}%
-            </label>
-            <input
-              id="min-discount"
-              type="range"
-              min={DISCOUNT_STEPS[0]}
-              max={DISCOUNT_STEPS[DISCOUNT_STEPS.length - 1]}
-              step={5}
-              value={minDiscount}
-              onChange={(event) => setMinDiscount(Number(event.target.value))}
-              className="range-slider"
-            />
           </section>
         </aside>
 

@@ -5,7 +5,7 @@ import { useCart } from "../state/CartContext.jsx";
 import { useAuth } from "../state/AuthContext.jsx";
 import ProductCard from "../components/ProductCard.jsx";
 import { formatUsdAndEtb } from "../utils/currency.js";
-import { applyGlobalProductDiscount, getDiscountPercent } from "../utils/pricing.js";
+import { getOriginalPrice } from "../utils/pricing.js";
 
 const CATEGORY_KEYWORDS = {
   Electronics: [
@@ -79,20 +79,6 @@ const buildEnhancedProduct = (product) => {
   const brand = product.brand || inferBrand(product.name);
   const rating = Number((product.rating ?? Math.min(5, 4 + (seed % 8) / 10)).toFixed(1));
   const reviewCount = Number(product.reviewCount ?? 85 + (seed % 470));
-  const discountPercent = Number(
-    product.discountPercent ?? (seed % 4 === 0 ? 0 : [10, 12, 15, 18, 20][seed % 5])
-  );
-  const originalPrice = Number(product.price || 0);
-  const baseCurrentPrice = Number(
-    (
-      product.discountedPrice ??
-      (discountPercent > 0
-        ? originalPrice - (originalPrice * discountPercent) / 100
-        : originalPrice)
-    ).toFixed(2)
-  );
-  const currentPrice = applyGlobalProductDiscount(baseCurrentPrice);
-  const effectiveDiscountPercent = getDiscountPercent(originalPrice, currentPrice);
 
   const colorOptions =
     product.colors?.length > 0
@@ -144,11 +130,8 @@ const buildEnhancedProduct = (product) => {
     brand,
     rating,
     reviewCount,
-    discountPercent: effectiveDiscountPercent,
-    originalPrice,
-    discountedPrice: baseCurrentPrice,
-    baseCurrentPrice,
-    currentPrice,
+    discountPercent: 0,
+    originalPrice: Number(product.price || 0),
     colors: colorOptions,
     storageOptions,
     galleryImages,
@@ -221,10 +204,7 @@ const ProductDetailPage = () => {
 
   const bundleTotal = useMemo(() => {
     if (!detailedProduct) return 0;
-    return [detailedProduct, ...frequentlyBought].reduce(
-      (sum, item) => sum + Number(item.currentPrice || 0),
-      0
-    );
+    return [detailedProduct, ...frequentlyBought].reduce((sum, item) => sum + getOriginalPrice(item), 0);
   }, [detailedProduct, frequentlyBought]);
 
   const getCartPayload = () => {
@@ -233,7 +213,7 @@ const ProductDetailPage = () => {
     return {
       ...detailedProduct,
       name: variantLabel ? `${detailedProduct.name} (${variantLabel})` : detailedProduct.name,
-      price: detailedProduct.currentPrice,
+      price: detailedProduct.price,
       selectedColor,
       selectedStorage,
     };
@@ -259,13 +239,7 @@ const ProductDetailPage = () => {
   const handleAddBundle = () => {
     handleAddToCart();
     frequentlyBought.forEach((item) => {
-      addToCart(
-        {
-          ...item,
-          price: item.currentPrice,
-        },
-        1
-      );
+      addToCart(item, 1);
     });
   };
 
@@ -318,13 +292,7 @@ const ProductDetailPage = () => {
           </p>
 
           <div className="detail-price-row">
-            <p className="detail-price">{formatUsdAndEtb(detailedProduct.currentPrice)}</p>
-            {detailedProduct.discountPercent > 0 ? (
-              <>
-                <p className="detail-price-old">{formatUsdAndEtb(detailedProduct.originalPrice)}</p>
-                <p className="detail-discount">-{detailedProduct.discountPercent}%</p>
-              </>
-            ) : null}
+            <p className="detail-price">{formatUsdAndEtb(getOriginalPrice(detailedProduct))}</p>
           </div>
 
           <p className={`stock-tag ${detailedProduct.inStock ? "in" : "out"}`}>

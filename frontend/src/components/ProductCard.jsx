@@ -1,11 +1,7 @@
 import { Link } from "react-router-dom";
 import { useCart } from "../state/CartContext.jsx";
 import { formatUsdAndEtb } from "../utils/currency.js";
-import {
-  getCurrentPrice,
-  getEffectiveDiscountPercent,
-  getOriginalPrice,
-} from "../utils/pricing.js";
+import { getOriginalPrice } from "../utils/pricing.js";
 
 const clampRating = (value) => {
   if (Number.isNaN(value)) return 4;
@@ -28,16 +24,12 @@ const ProductCard = ({
 
   const isCatalog = variant === "catalog";
   const originalPrice = getOriginalPrice(product);
-  const finalPrice = getCurrentPrice(product);
-  const discountPercent = getEffectiveDiscountPercent(product);
   const rating = clampRating(Number(product.rating ?? 4.2));
   const ratingCount = Number(product.ratingCount ?? 0);
   const shortDescription =
     product.shortDescription ??
     product.description?.slice(0, 95) ??
     "Premium quality product for your lifestyle.";
-
-  const hasDiscount = discountPercent > 0 && finalPrice < originalPrice;
 
   const handleWishlistClick = (event) => {
     event.preventDefault();
@@ -90,16 +82,10 @@ const ProductCard = ({
 
         {isCatalog ? (
           <div className="price-stack">
-            <p className="price-current">{formatUsdAndEtb(finalPrice)}</p>
-            {hasDiscount ? (
-              <>
-                <p className="price-original">{formatUsdAndEtb(originalPrice)}</p>
-                <p className="discount-chip">-{discountPercent}%</p>
-              </>
-            ) : null}
+            <p className="price-current">{formatUsdAndEtb(originalPrice)}</p>
           </div>
         ) : (
-          <p className="price">{formatUsdAndEtb(finalPrice)}</p>
+          <p className="price">{formatUsdAndEtb(originalPrice)}</p>
         )}
 
         <button
