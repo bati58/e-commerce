@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../state/CartContext.jsx";
-import { useAuth } from "../state/AuthContext.jsx";
 
 const SHIPPING_FEE = 10;
 const TAX_RATE = 0.05;
@@ -21,7 +20,6 @@ const getOriginalUnitPrice = (item) =>
 
 const CartPage = () => {
   const { cartItems, updateQuantity, removeFromCart } = useCart();
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [promoCode, setPromoCode] = useState("");
   const [appliedPromo, setAppliedPromo] = useState(null);
@@ -94,11 +92,7 @@ const CartPage = () => {
   }, []);
 
   const handleCheckout = () => {
-    if (!user) {
-      navigate("/login", { state: { from: "/checkout" } });
-    } else {
-      navigate("/checkout");
-    }
+    navigate("/checkout");
   };
 
   const handleQuantityChange = (item, nextQuantity) => {
