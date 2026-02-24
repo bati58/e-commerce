@@ -14,6 +14,7 @@ import AccountPage from "./pages/AccountPage.jsx";
 import PrivateRoute from "./components/PrivateRoute.jsx";
 import { useCart } from "./state/CartContext.jsx";
 import { formatUsdAndEtb } from "./utils/currency.js";
+import { getCurrentPrice } from "./utils/pricing.js";
 
 const App = () => {
   const { cartItems, cartToast } = useCart();
@@ -27,10 +28,7 @@ const App = () => {
   const cartSubtotal = useMemo(
     () =>
       cartItems.reduce(
-        (sum, item) =>
-          sum +
-          Number(item.discountedPrice ?? item.price ?? 0) *
-            Number(item.quantity || 0),
+        (sum, item) => sum + getCurrentPrice(item) * Number(item.quantity || 0),
         0
       ),
     [cartItems]

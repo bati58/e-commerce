@@ -2,6 +2,7 @@ import express from "express";
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 import { protect } from "../middleware/authMiddleware.js";
+import { getDiscountedUnitPrice } from "../utils/pricing.js";
 
 const router = express.Router();
 
@@ -31,7 +32,7 @@ router.post("/", protect, async (req, res, next) => {
         product: product._id,
         name: product.name,
         quantity: item.quantity,
-        price: product.price,
+        price: getDiscountedUnitPrice(product.price),
         image: product.image,
       });
     }
@@ -61,4 +62,3 @@ router.get("/my-orders", protect, async (req, res, next) => {
 });
 
 export default router;
-

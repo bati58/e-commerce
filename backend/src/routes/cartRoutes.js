@@ -1,6 +1,7 @@
 import express from "express";
 import { protect } from "../middleware/authMiddleware.js";
 import Product from "../models/Product.js";
+import { getDiscountedUnitPrice, getLineTotal, roundMoney } from "../utils/pricing.js";
 
 const router = express.Router();
 
@@ -23,18 +24,19 @@ router.post("/validate", protect, async (req, res, next) => {
       if (!product) continue;
 
       const quantity = Math.min(item.quantity, product.stock);
-      const lineTotal = product.price * quantity;
+      const discountedUnitPrice = getDiscountedUnitPrice(product.price);
+      const lineTotal = getLineTotal(discountedUnitPrice, quantity);
 
       validatedItems.push({
         productId: product._id,
         name: product.name,
         quantity,
-        price: product.price,
+        price: discountedUnitPrice,
         image: product.image,
         lineTotal,
       });
 
-      total += lineTotal;
+      total = roundMoney(total + lineTotal);
     }
 
     res.json({ items: validatedItems, total });
@@ -44,4 +46,3 @@ router.post("/validate", protect, async (req, res, next) => {
 });
 
 export default router;
-

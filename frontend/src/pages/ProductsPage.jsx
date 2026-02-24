@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import apiClient from "../utils/apiClient.js";
 import ProductCard from "../components/ProductCard.jsx";
+import { applyGlobalProductDiscount, getDiscountPercent } from "../utils/pricing.js";
 
 const PAGE_SIZE = 8;
 const WISHLIST_STORAGE_KEY = "mern_wishlist_ids";
@@ -89,7 +90,7 @@ const buildPresentationProduct = (product) => {
   );
 
   const originalPrice = Number(product.price ?? 0);
-  const discountedPrice = Number(
+  const baseCurrentPrice = Number(
     (
       product.discountedPrice ??
       (discountPercent > 0
@@ -97,6 +98,8 @@ const buildPresentationProduct = (product) => {
         : originalPrice)
     ).toFixed(2)
   );
+  const currentPrice = applyGlobalProductDiscount(baseCurrentPrice);
+  const effectiveDiscountPercent = getDiscountPercent(originalPrice, currentPrice);
 
   const isFashion = category === "Fashion";
   const sizePool = isFashion ? ["XS", "S", "M", "L", "XL"] : ["One Size", "Standard"];
@@ -117,9 +120,11 @@ const buildPresentationProduct = (product) => {
     brand,
     rating,
     ratingCount,
-    discountPercent,
+    discountPercent: effectiveDiscountPercent,
     originalPrice,
-    discountedPrice,
+    discountedPrice: baseCurrentPrice,
+    baseCurrentPrice,
+    currentPrice,
     shortDescription: safeDescription,
     sizes,
     colors,
@@ -192,7 +197,7 @@ const ProductsPage = () => {
       return;
     }
 
-    const prices = decoratedProducts.map((product) => Number(product.discountedPrice || 0));
+    const prices = decoratedProducts.map((product) => Number(product.currentPrice || 0));
     const nextMin = Math.floor(Math.min(...prices));
     const nextMax = Math.ceil(Math.max(...prices));
 
@@ -230,7 +235,7 @@ const ProductsPage = () => {
 
   const filteredProducts = useMemo(() => {
     return decoratedProducts.filter((product) => {
-      const finalPrice = Number(product.discountedPrice || 0);
+      const finalPrice = Number(product.currentPrice || 0);
 
       if (isWishlistMode && !wishlistIds.includes(product._id)) return false;
 
@@ -282,10 +287,10 @@ const ProductsPage = () => {
     const list = [...filteredProducts];
     list.sort((left, right) => {
       if (sortBy === "price-asc") {
-        return left.discountedPrice - right.discountedPrice;
+        return left.currentPrice - right.currentPrice;
       }
       if (sortBy === "price-desc") {
-        return right.discountedPrice - left.discountedPrice;
+        return right.currentPrice - left.currentPrice;
       }
       if (sortBy === "newest") {
         return new Date(right.createdAt || 0) - new Date(left.createdAt || 0);

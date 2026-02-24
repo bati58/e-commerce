@@ -5,6 +5,7 @@ import { useCart } from "../state/CartContext.jsx";
 import { useAuth } from "../state/AuthContext.jsx";
 import ProductCard from "../components/ProductCard.jsx";
 import { formatUsdAndEtb } from "../utils/currency.js";
+import { applyGlobalProductDiscount, getDiscountPercent } from "../utils/pricing.js";
 
 const CATEGORY_KEYWORDS = {
   Electronics: [
@@ -82,7 +83,7 @@ const buildEnhancedProduct = (product) => {
     product.discountPercent ?? (seed % 4 === 0 ? 0 : [10, 12, 15, 18, 20][seed % 5])
   );
   const originalPrice = Number(product.price || 0);
-  const discountedPrice = Number(
+  const baseCurrentPrice = Number(
     (
       product.discountedPrice ??
       (discountPercent > 0
@@ -90,6 +91,8 @@ const buildEnhancedProduct = (product) => {
         : originalPrice)
     ).toFixed(2)
   );
+  const currentPrice = applyGlobalProductDiscount(baseCurrentPrice);
+  const effectiveDiscountPercent = getDiscountPercent(originalPrice, currentPrice);
 
   const colorOptions =
     product.colors?.length > 0
@@ -141,9 +144,11 @@ const buildEnhancedProduct = (product) => {
     brand,
     rating,
     reviewCount,
-    discountPercent,
+    discountPercent: effectiveDiscountPercent,
     originalPrice,
-    discountedPrice,
+    discountedPrice: baseCurrentPrice,
+    baseCurrentPrice,
+    currentPrice,
     colors: colorOptions,
     storageOptions,
     galleryImages,
@@ -217,7 +222,7 @@ const ProductDetailPage = () => {
   const bundleTotal = useMemo(() => {
     if (!detailedProduct) return 0;
     return [detailedProduct, ...frequentlyBought].reduce(
-      (sum, item) => sum + Number(item.discountedPrice || 0),
+      (sum, item) => sum + Number(item.currentPrice || 0),
       0
     );
   }, [detailedProduct, frequentlyBought]);
@@ -228,7 +233,7 @@ const ProductDetailPage = () => {
     return {
       ...detailedProduct,
       name: variantLabel ? `${detailedProduct.name} (${variantLabel})` : detailedProduct.name,
-      price: detailedProduct.discountedPrice,
+      price: detailedProduct.currentPrice,
       selectedColor,
       selectedStorage,
     };
@@ -257,7 +262,7 @@ const ProductDetailPage = () => {
       addToCart(
         {
           ...item,
-          price: item.discountedPrice,
+          price: item.currentPrice,
         },
         1
       );
@@ -313,7 +318,7 @@ const ProductDetailPage = () => {
           </p>
 
           <div className="detail-price-row">
-            <p className="detail-price">{formatUsdAndEtb(detailedProduct.discountedPrice)}</p>
+            <p className="detail-price">{formatUsdAndEtb(detailedProduct.currentPrice)}</p>
             {detailedProduct.discountPercent > 0 ? (
               <>
                 <p className="detail-price-old">{formatUsdAndEtb(detailedProduct.originalPrice)}</p>

@@ -5,13 +5,14 @@ import { useAuth } from "../state/AuthContext.jsx";
 import { useCart } from "../state/CartContext.jsx";
 import apiClient from "../utils/apiClient.js";
 import { formatUsdAndEtb } from "../utils/currency.js";
+import { getCurrentPrice } from "../utils/pricing.js";
 
 const SHIPPING_FEE = 10;
 const TAX_RATE = 0.05;
 const SHIPPING_STORAGE_KEY = "mern_checkout_shipping";
 const GUEST_ORDERS_KEY = "mern_guest_orders";
 
-const getUnitPrice = (item) => Number(item.discountedPrice ?? item.price ?? 0);
+const getUnitPrice = (item) => getCurrentPrice(item);
 
 const readShippingFromStorage = () => {
   if (typeof window === "undefined") return null;

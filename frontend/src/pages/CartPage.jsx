@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../state/CartContext.jsx";
 import { formatUsdAndEtb } from "../utils/currency.js";
+import { getCurrentPrice, getOriginalPrice } from "../utils/pricing.js";
 
 const SHIPPING_FEE = 10;
 const TAX_RATE = 0.05;
@@ -12,10 +13,9 @@ const PROMO_CODES = {
   FREESHIP: { type: "shipping", value: SHIPPING_FEE, label: "Free shipping" },
 };
 
-const getUnitPrice = (item) => Number(item.discountedPrice ?? item.price ?? 0);
+const getUnitPrice = (item) => getCurrentPrice(item);
 
-const getOriginalUnitPrice = (item) =>
-  Number(item.originalPrice ?? item.price ?? item.discountedPrice ?? 0);
+const getOriginalUnitPrice = (item) => getOriginalPrice(item);
 
 const CartPage = () => {
   const { cartItems, updateQuantity, removeFromCart } = useCart();
