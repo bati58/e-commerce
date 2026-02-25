@@ -34,15 +34,27 @@ const TRUST_POINTS = [
 
 const TESTIMONIALS = [
   {
-    name: "Nadia R.",
+    name: "Bekam G.",
     text: "Fast delivery and the quality matched exactly what I saw online.",
   },
   {
-    name: "Michael T.",
+    name: "Teshome W.",
     text: "Checkout was smooth and customer support answered right away.",
   },
   {
-    name: "Aisha K.",
+    name: "Aisha k.",
+    text: "Great pricing on watches and clothing. I will order again.",
+  },
+  {
+    name: "michael S.",
+    text: "Great pricing on watches and clothing. I will order again.",
+  },
+  {
+    name: "Helen G.",
+    text: "Great pricing on watches and clothing. I will order again.",
+  },
+  {
+    name: "Begonet D.",
     text: "Great pricing on watches and clothing. I will order again.",
   },
 ];
@@ -150,7 +162,7 @@ const HomePage = () => {
           </div>
 
           <div className="hero-media">
-            {featuredProducts.slice(0, 3).map((product, index) => (
+            {featuredProducts.slice(0, 5).map((product, index) => (
               <img
                 key={product._id}
                 src={product.image}
