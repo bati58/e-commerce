@@ -455,6 +455,10 @@ a {
   border-radius: 0.85rem;
   border: 1px solid rgba(255, 255, 255, 0.25);
 }
+.hero-media img:hover {
+  transform: scale(1.05) translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+}
 
 .hero-media img:first-child {
   grid-column: span 2;
